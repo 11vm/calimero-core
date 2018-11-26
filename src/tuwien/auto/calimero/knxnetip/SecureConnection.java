@@ -105,6 +105,8 @@ import tuwien.auto.calimero.knxnetip.util.HPAI;
 import tuwien.auto.calimero.log.LogService;
 import tuwien.auto.calimero.log.LogService.LogLevel;
 
+import tuwien.auto.calimero.internal.NetworkInterfaceEx;
+
 /**
  * Provides KNX IP Secure routing and tunneling connections (experimental).
  */
@@ -439,7 +441,7 @@ public final class SecureConnection extends KNXnetIPRouting {
 	// finds a local IPv4 address with its network prefix "matching" the remote address
 	private static Optional<InetAddress> onSameSubnet(final InetAddress remote) {
 		try {
-			return NetworkInterface.networkInterfaces().flatMap(ni -> ni.getInterfaceAddresses().stream())
+			return NetworkInterfaceEx.networkInterfaces().flatMap(ni -> ni.getInterfaceAddresses().stream())
 					.filter(ia -> ia.getAddress() instanceof Inet4Address)
 //					.peek(ia -> logger.trace("match local address {}/{} to {}", ia.getAddress(), ia.getNetworkPrefixLength(), remote))
 					.filter(ia -> ClientConnection.matchesPrefix(ia.getAddress(), ia.getNetworkPrefixLength(), remote))
@@ -592,6 +594,12 @@ public final class SecureConnection extends KNXnetIPRouting {
 		}
 	}
 
+        private static int version()
+        {
+            String tmp = System.getProperty("java.version");
+            return Integer.parseInt(tmp.substring(0, tmp.indexOf(".")));
+        }
+
 	// unicast session
 	// session.req -> session.res -> auth.req -> session-status
 	private void setupSecureSession(final InetSocketAddress localEP, final InetSocketAddress serverCtrlEP) throws KNXException {
@@ -601,7 +609,7 @@ public final class SecureConnection extends KNXnetIPRouting {
 				+ serverCtrlEP.getPort());
 
 		logger.debug("setup secure session with {}", serverCtrlEP);
-		if (Runtime.version().version().get(0) < 11) {
+		if (version() < 11) {
 			generateKeyPair(privateKey, publicKey);
 		}
 		else {
@@ -704,10 +712,10 @@ public final class SecureConnection extends KNXnetIPRouting {
 		try {
 			final NetworkInterface ni = ((MulticastSocket) socket).getNetworkInterface();
 			final boolean noneSet = ni.getInetAddresses().nextElement().isAnyLocalAddress();
-			netifs = noneSet ? NetworkInterface.networkInterfaces() : Stream.of(ni);
+			netifs = noneSet ? NetworkInterfaceEx.networkInterfaces() : Stream.of(ni);
 		}
 		catch (final SocketException e) {}
-		return netifs.flatMap(ni -> ni.inetAddresses()).anyMatch(addr::equals);
+		return netifs.flatMap(ni -> NetworkInterfaceEx.inetAddresses(ni)).anyMatch(addr::equals);
 	}
 
 	private void scheduleGroupSync(final long initialDelay) {
@@ -861,7 +869,7 @@ public final class SecureConnection extends KNXnetIPRouting {
 		buffer.get(serverPublicKey);
 
 		final byte[] sharedSecret;
-		if (Runtime.version().version().get(0) < 11) {
+		if (version() < 11) {
 			sharedSecret = keyAgreement(serverPublicKey);
 		}
 		else {
@@ -1019,7 +1027,7 @@ public final class SecureConnection extends KNXnetIPRouting {
 		}
 		for (int i = 0; result.hasRemaining(); i++)
 			result.put((byte) (buffer.get() ^ cipher[i]));
-		return result.flip();
+		return (ByteBuffer) result.flip();
 	}
 
 	private static byte[] cipherStream(final int blocks, final Key secretKey, final byte[] secInfo)

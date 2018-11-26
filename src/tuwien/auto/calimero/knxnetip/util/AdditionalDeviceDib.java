@@ -106,7 +106,7 @@ public class AdditionalDeviceDib extends DIB {
 
 	@Override
 	public byte[] toByteArray() {
-		final ByteBuffer buf = ByteBuffer.wrap(super.toByteArray()).position(2);
+		final ByteBuffer buf = (ByteBuffer) ByteBuffer.wrap(super.toByteArray()).position(2);
 		buf.put((byte) status);
 		buf.put((byte) 0);
 		buf.putShort((short) maxApduLength);

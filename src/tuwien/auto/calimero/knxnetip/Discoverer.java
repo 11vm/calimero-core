@@ -80,8 +80,9 @@ import tuwien.auto.calimero.knxnetip.servicetype.PacketHelper;
 import tuwien.auto.calimero.knxnetip.servicetype.SearchRequest;
 import tuwien.auto.calimero.knxnetip.servicetype.SearchResponse;
 import tuwien.auto.calimero.knxnetip.util.DIB;
-import tuwien.auto.calimero.knxnetip.util.Srp;
 import tuwien.auto.calimero.log.LogService;
+
+import tuwien.auto.calimero.internal.NetworkInterfaceEx;
 
 /**
  * Does KNXnet/IP discovery and retrieval of self description from other devices.
@@ -316,7 +317,7 @@ public class Discoverer
 			return searchAsync(timeout);
 		}
 		catch (final KNXException e) {
-			return CompletableFuture.failedFuture(e);
+			return NetworkInterfaceEx.failedFuture(e);
 		}
 	}
 
@@ -471,7 +472,7 @@ public class Discoverer
 			throw new KNXIllegalArgumentException("timeout has to be >= 0");
 		final NetworkInterface[] nifs;
 		try {
-			nifs = NetworkInterface.networkInterfaces().toArray(NetworkInterface[]::new);
+			nifs = NetworkInterfaceEx.networkInterfaces().toArray(NetworkInterface[]::new);
 		}
 		catch (final SocketException e) {
 			logger.error("failed to get network interfaces", e);

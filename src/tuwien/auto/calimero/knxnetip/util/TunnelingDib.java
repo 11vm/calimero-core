@@ -116,7 +116,7 @@ public class TunnelingDib extends DIB {
 
 	@Override
 	public byte[] toByteArray() {
-		final ByteBuffer buf = ByteBuffer.wrap(super.toByteArray()).position(2);
+		final ByteBuffer buf = (ByteBuffer) ByteBuffer.wrap(super.toByteArray()).position(2);
 		buf.putShort(maxApduLength);
 		for (int k = 0; k < addresses.length; k++) {
 			buf.put(addresses[k].toByteArray());

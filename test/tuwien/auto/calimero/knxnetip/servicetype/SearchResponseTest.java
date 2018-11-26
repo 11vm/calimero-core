@@ -58,13 +58,15 @@ import tuwien.auto.calimero.knxnetip.util.HPAI;
 import tuwien.auto.calimero.knxnetip.util.ServiceFamiliesDIB;
 import tuwien.auto.calimero.knxnetip.util.TunnelingDib;
 
+import tuwien.auto.calimero.internal.ListEx;
+
 class SearchResponseTest {
 	private final HPAI hpai = new HPAI((InetAddress) null, 0);
 
 	private DeviceDIB device;
 	private final ServiceFamiliesDIB svcFamilies = new ServiceFamiliesDIB(new int[] { 2, 3, 4 }, new int[] { 1, 1, 1 });
 	private final ServiceFamiliesDIB secureFamilies = ServiceFamiliesDIB.newSecureServiceFamilies(new int[] { 3, 4 }, new int[] { 1, 1 });
-	private final TunnelingDib tunneling = new TunnelingDib(List.of(new IndividualAddress(1, 2, 3)), new int[] { 1 });
+	private final TunnelingDib tunneling = new TunnelingDib(ListEx.of(new IndividualAddress(1, 2, 3)), new int[] { 1 });
 
 	@BeforeEach
 	void init() throws UnknownHostException {
@@ -74,7 +76,7 @@ class SearchResponseTest {
 
 	@Test
 	void structLengthOfBasicResponse() {
-		final List<DIB> dibs = List.of(device, svcFamilies);
+		final List<DIB> dibs = ListEx.of(device, svcFamilies);
 		final SearchResponse res = new SearchResponse(false, hpai, dibs);
 
 		assertEquals(device.getStructLength() + svcFamilies.getStructLength() + tunneling.getStructLength(), res.getStructLength());
@@ -82,7 +84,7 @@ class SearchResponseTest {
 
 	@Test
 	void structLengthWithRequestedDibs() {
-		final List<DIB> dibs = List.of(device, svcFamilies, secureFamilies, tunneling);
+		final List<DIB> dibs = ListEx.of(device, svcFamilies, secureFamilies, tunneling);
 		final SearchResponse res = new SearchResponse(true, hpai, dibs);
 		final int expected = hpai.getStructLength() + device.getStructLength() + svcFamilies.getStructLength()
 				+ secureFamilies.getStructLength() + tunneling.getStructLength();
@@ -92,7 +94,7 @@ class SearchResponseTest {
 
 	@Test
 	void basicResponseFromByteArray() throws KNXFormatException {
-		final List<DIB> dibs = List.of(device, svcFamilies);
+		final List<DIB> dibs = ListEx.of(device, svcFamilies);
 		final SearchResponse res = new SearchResponse(false, hpai, dibs);
 		final byte[] packet = PacketHelper.toPacket(res);
 
@@ -106,7 +108,7 @@ class SearchResponseTest {
 
 	@Test
 	void responseFromByteArray() throws KNXFormatException {
-		final List<DIB> dibs = List.of(device, svcFamilies, secureFamilies, tunneling);
+		final List<DIB> dibs = ListEx.of(device, svcFamilies, secureFamilies, tunneling);
 
 		final SearchResponse res = new SearchResponse(true, hpai, dibs);
 		final byte[] packet = PacketHelper.toPacket(res);
@@ -122,17 +124,17 @@ class SearchResponseTest {
 	@Test
 	void validSearchResponse() {
 		new SearchResponse(hpai, device, svcFamilies);
-		new SearchResponse(false, hpai, List.of(device, svcFamilies));
-		new SearchResponse(true, hpai, List.of(device, svcFamilies));
+		new SearchResponse(false, hpai, ListEx.of(device, svcFamilies));
+		new SearchResponse(true, hpai, ListEx.of(device, svcFamilies));
 	}
 
 	@Test
 	void invalidSearchResponse() {
-		assertThrows(KNXIllegalArgumentException.class, () -> new SearchResponse(false, hpai, List.of()), "empty DIB list");
-		assertThrows(KNXIllegalArgumentException.class, () -> new SearchResponse(true, hpai, List.of()), "empty DIB list");
+		assertThrows(KNXIllegalArgumentException.class, () -> new SearchResponse(false, hpai, ListEx.of()), "empty DIB list");
+		assertThrows(KNXIllegalArgumentException.class, () -> new SearchResponse(true, hpai, ListEx.of()), "empty DIB list");
 
-		assertThrows(KNXIllegalArgumentException.class, () -> new SearchResponse(false, hpai, List.of(device)), "DIB list size < 2");
-		assertThrows(KNXIllegalArgumentException.class, () -> new SearchResponse(true, hpai, List.of(device)), "DIB list size < 2");
+		assertThrows(KNXIllegalArgumentException.class, () -> new SearchResponse(false, hpai, ListEx.of(device)), "DIB list size < 2");
+		assertThrows(KNXIllegalArgumentException.class, () -> new SearchResponse(true, hpai, ListEx.of(device)), "DIB list size < 2");
 	}
 
 	@Test
@@ -147,7 +149,7 @@ class SearchResponseTest {
 		byte[] bytes = new byte[]{(byte) 0x08, (byte) 0x07, (byte) 0x00, (byte) 0xfe, (byte) 0x12, (byte) 0x03, (byte) 0xff, (byte) 0xf9};
 		assertArrayEquals(bytes, dib.toByteArray());
 
-		dib = new TunnelingDib(List.of(new IndividualAddress(1, 2, 3)), new int[] { 7 });
+		dib = new TunnelingDib(ListEx.of(new IndividualAddress(1, 2, 3)), new int[] { 7 });
 		bytes = new byte[]{(byte) 0x08, (byte) 0x07, (byte) 0x00, (byte) 0xfe, (byte) 0x12, (byte) 0x03, (byte) 0xff, (byte) 0xff};
 		assertArrayEquals(bytes, dib.toByteArray());
 	}

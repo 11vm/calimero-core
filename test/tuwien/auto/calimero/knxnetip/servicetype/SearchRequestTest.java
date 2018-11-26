@@ -50,6 +50,8 @@ import tuwien.auto.calimero.KNXFormatException;
 import tuwien.auto.calimero.knxnetip.util.ServiceFamiliesDIB;
 import tuwien.auto.calimero.knxnetip.util.Srp;
 
+import tuwien.auto.calimero.internal.ListEx;
+
 class SearchRequestTest {
 
 	private final InetSocketAddress responseAddr = new InetSocketAddress("192.168.10.10", 3671);
@@ -97,7 +99,7 @@ class SearchRequestTest {
 		assertEquals(KNXnetIPHeader.SearchRequest, h.getServiceType());
 
 		final SearchRequest req = SearchRequest.from(h, packet, h.getStructLength());
-		assertEquals(List.of(), req.searchParameters(), "SRP count mismatch");
+		assertEquals(ListEx.of(), req.searchParameters(), "SRP count mismatch");
 	}
 
 	@Test

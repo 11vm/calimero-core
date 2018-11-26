@@ -75,6 +75,8 @@ import tuwien.auto.calimero.cemi.CEMILData;
 import tuwien.auto.calimero.knxnetip.servicetype.TunnelingFeature;
 import tuwien.auto.calimero.knxnetip.servicetype.TunnelingFeature.InterfaceFeature;
 
+import tuwien.auto.calimero.internal.ListEx;
+
 /**
  * @author B. Malinowsky
  */
@@ -521,7 +523,7 @@ class KNXnetIPTunnelTest
 	@EnumSource(InterfaceFeature.class)
 	void tunnelingFeatureSet(final InterfaceFeature feature) throws InterruptedException, KNXException {
 		newTunnel();
-		final List<InterfaceFeature> twoBytes = List.of(InterfaceFeature.SupportedEmiTypes, InterfaceFeature.DeviceDescriptorType0,
+		final List<InterfaceFeature> twoBytes = ListEx.of(InterfaceFeature.SupportedEmiTypes, InterfaceFeature.DeviceDescriptorType0,
 				InterfaceFeature.Manufacturer, InterfaceFeature.IndividualAddress, InterfaceFeature.MaxApduLength);
 		final int length = twoBytes.contains(feature) ? 2 : 1;
 
